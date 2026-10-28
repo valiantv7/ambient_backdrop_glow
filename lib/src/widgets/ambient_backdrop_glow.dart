@@ -81,7 +81,7 @@ class _AmbientBackdropGlowState extends State<AmbientBackdropGlow>
     );
 
     if (widget.style.speed > 0) {
-      _motionController.repeat();
+      _startMotion();
     }
 
     _crossFadeController = AnimationController(
@@ -123,11 +123,25 @@ class _AmbientBackdropGlowState extends State<AmbientBackdropGlow>
 
     if (widget.style.speed != oldWidget.style.speed) {
       if (widget.style.speed > 0 && !_motionController.isAnimating) {
-        _motionController.repeat();
+        _startMotion();
       } else if (widget.style.speed == 0 && _motionController.isAnimating) {
         _motionController.stop();
       }
     }
+
+    if (widget.mode != oldWidget.mode && widget.style.speed > 0) {
+      _motionController.stop();
+      _startMotion();
+    }
+  }
+
+  /// Starts the ambient motion loop.
+  ///
+  /// Aurora mode plays the loop back and forth (`reverse`) so the waves bounce
+  /// off their end position instead of snapping back to the start, which would
+  /// otherwise produce a noticeable jump.
+  void _startMotion() {
+    _motionController.repeat(reverse: widget.mode == AmbientGlowMode.aurora);
   }
 
   void _extractFromImage(ImageProvider imageProvider) async {
