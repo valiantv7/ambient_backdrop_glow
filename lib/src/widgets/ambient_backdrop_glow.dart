@@ -1,6 +1,8 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
+
 import '../color/color_extractor.dart';
 import '../color/oklab_interpolation.dart';
 import '../models/ambient_glow_config.dart';
@@ -63,8 +65,7 @@ class AmbientBackdropGlow extends StatefulWidget {
   State<AmbientBackdropGlow> createState() => _AmbientBackdropGlowState();
 }
 
-class _AmbientBackdropGlowState extends State<AmbientBackdropGlow>
-    with TickerProviderStateMixin {
+class _AmbientBackdropGlowState extends State<AmbientBackdropGlow> with TickerProviderStateMixin {
   late AnimationController _motionController;
   late AnimationController _crossFadeController;
 
@@ -137,16 +138,15 @@ class _AmbientBackdropGlowState extends State<AmbientBackdropGlow>
 
   /// Starts the ambient motion loop.
   ///
-  /// Aurora mode plays the loop back and forth (`reverse`) so the waves bounce
-  /// off their end position instead of snapping back to the start, which would
+  /// Let the animations bounce off their end position
+  /// instead of snapping back to the start, which would
   /// otherwise produce a noticeable jump.
   void _startMotion() {
-    _motionController.repeat(reverse: widget.mode == AmbientGlowMode.aurora);
+    _motionController.repeat(reverse: true);
   }
 
   void _extractFromImage(ImageProvider imageProvider) async {
-    final palette =
-        await AmbientColorExtractor.extractFromProvider(imageProvider);
+    final palette = await AmbientColorExtractor.extractFromProvider(imageProvider);
     if (mounted) {
       _animateToPalette(palette);
     }
@@ -164,8 +164,7 @@ class _AmbientBackdropGlowState extends State<AmbientBackdropGlow>
     _crossFadeController.forward(from: 0.0);
   }
 
-  AmbientColorPalette _lerpPalette(
-      AmbientColorPalette a, AmbientColorPalette b, double t) {
+  AmbientColorPalette _lerpPalette(AmbientColorPalette a, AmbientColorPalette b, double t) {
     return AmbientColorPalette(
       primary: OkLab.lerp(a.primary, b.primary, t),
       secondary: OkLab.lerp(a.secondary, b.secondary, t),
@@ -194,14 +193,10 @@ class _AmbientBackdropGlowState extends State<AmbientBackdropGlow>
           AnimatedBuilder(
             animation: _motionController,
             builder: (context, child) {
-              final double phase =
-                  _motionController.value * 2 * math.pi * widget.style.speed;
-              final double pulseMultiplier = widget.style.enablePulse
-                  ? 1.0 + 0.15 * math.sin(phase * 2)
-                  : 1.0;
+              final double phase = _motionController.value * 2 * math.pi * widget.style.speed;
+              final double pulseMultiplier = widget.style.enablePulse ? 1.0 + 0.15 * math.sin(phase * 2) : 1.0;
               final effectiveStyle = widget.style.copyWith(
-                intensity:
-                    (widget.style.intensity * pulseMultiplier).clamp(0.0, 1.0),
+                intensity: (widget.style.intensity * pulseMultiplier).clamp(0.0, 1.0),
               );
 
               final CustomPainter painter = widget.mode == AmbientGlowMode.mesh
